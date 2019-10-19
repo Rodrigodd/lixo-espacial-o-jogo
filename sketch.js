@@ -121,7 +121,7 @@ class Lixo {
   hit(bullet) {
     if (dist(bullet.x, bullet.y, this.x, this.y) < this.radius) {
       this.life-=1;
-      const MASS_RATIO = 1/30;
+      const MASS_RATIO = 1/10;
       this.vx += bullet.vx*MASS_RATIO;
       this.vy += bullet.vy*MASS_RATIO;
       this.is_hit = 5;
@@ -164,33 +164,35 @@ class Player {
     let sx = cos(this.a);
     let sy = sin(this.a);
 
-    if (keys.mouse_control) {
-      let mousev = mouseVel();
-      keys.accel = min(mousev.y / 12, 1.0);
-      keys.rot = min(mousev.x / 12, 1.0);
-    }
-
-    if (keys.accel > 0) {
-      this.vx += fx * ACCELL * dt;
-      this.vy += fy * ACCELL * dt;
-    }
-    if (keys.rot != 0) {
-      this.va += keys.rot * TORQUE * dt;
-    }
-    if (keys.fire) {
-      if (this.fire_delay <= 0.0) {
-        const BULLET_VEL = 120;
-
-        let px = this.x + fx*10 + 23.5*sx*(this.cannon==0? 1 : -1);
-        let py = this.y + fy*10 + 23.5*sy*(this.cannon==0? 1 : -1);
-
-        this.cannon = (this.cannon==0? 1 : 0);
-
-        bullets.push(new Bullet(px ,py, fx*BULLET_VEL, fy*BULLET_VEL));
-        this.fire_delay = FIRE_INT;
+    if (this.life >= 0) {
+      if (keys.mouse_control) {
+        let mousev = mouseVel();
+        keys.accel = min(mousev.y / 12, 1.0);
+        keys.rot = min(mousev.x / 12, 1.0);
       }
+
+      if (keys.accel > 0) {
+        this.vx += fx * ACCELL * dt;
+        this.vy += fy * ACCELL * dt;
+      }
+      if (keys.rot != 0) {
+        this.va += keys.rot * TORQUE * dt;
+      }
+      if (keys.fire) {
+        if (this.fire_delay <= 0.0) {
+          const BULLET_VEL = 120;
+
+          let px = this.x + fx*10 + 23.5*sx*(this.cannon==0? 1 : -1);
+          let py = this.y + fy*10 + 23.5*sy*(this.cannon==0? 1 : -1);
+
+          this.cannon = (this.cannon==0? 1 : 0);
+
+          bullets.push(new Bullet(px ,py, fx*BULLET_VEL, fy*BULLET_VEL));
+          this.fire_delay = FIRE_INT;
+        }
+      }
+      this.fire_delay -= dt;
     }
-    this.fire_delay -= dt;
 
     this.x += this.vx * dt;
     this.y += this.vy * dt;
@@ -220,11 +222,11 @@ class Player {
 
       let n = dvx*dx + dvy*dy;
 
-      this.vx -= 1.05*n*dx;
-      this.vy -= 1.05*n*dy;
+      this.vx -= 1.0*n*dx;
+      this.vy -= 1.0*n*dy;
 
-      lixo.vx += 1.05*n*dx;
-      lixo.vy += 1.05*n*dy;
+      lixo.vx += 1.0*n*dx;
+      lixo.vy += 1.0*n*dy;
     }
   }
 
@@ -261,6 +263,7 @@ let player;
 let satelite;
 let lixos = [];
 let bullets = [];
+let stars = [];
 
 let lixo_delay = 0.0;
 let time = 0.0;
@@ -278,6 +281,10 @@ function preload() {
 function setup() {
   createCanvas(800, 600);
   background(10);
+
+  for(let i = 0; i< 40; i++) {
+    stars.push({x: random(width), y: random(height)});
+  }
 
   init_new_game();
 }
@@ -415,6 +422,15 @@ function draw() {
 
   background(10);
 
+  // noStroke();
+  // fill(255);
+  stroke(255);
+
+  for(let i = 0; i < stars.length; i++){
+    // rect()
+    point(stars[i].x, stars[i].y);
+  }
+
   image(terra_image, floor(width/4) - 64, height/2 - 64, 128, 128, 128*(floor(time)%3), 0, 128, 128);
 
   for (let i = bullets.length - 1; i >= 0; i--) {
@@ -447,6 +463,8 @@ function draw() {
     fill(255,255,0);
     stroke(0);
     text(`SCORE: ${floor(time)}`, 10, 10);
+    textAlign(RIGHT,TOP); 
+    text(`LIFES: ${floor(player.life-1)}x`, width - 10, 10);
   }
   strokeWeight(1);
 
