@@ -249,7 +249,7 @@ class Player {
     translate(floor(this.x), floor(this.y));
     rotate(this.a);
     translate(-32, -36);
-    image(nave_image, 0, 0, 64, 72, sx*64, 0, 64, 72);
+    image(nave_image, 0, 0, 64, 72, 64*sx, 72*(3 - this.life), 64, 72);
     pop();
   }
 }
@@ -477,9 +477,9 @@ function draw() {
     fill(255,0,0);
     stroke(0);
     strokeWeight(3);
-    text("YOU FAIL!!!!", width/2, height/2);
+    text("YOU FAIL!!!!", width/2, height/3);
     textSize(32);
-    text(`you protect the satellite for ${floor(time)} seconds`, width/2, height/2 + 64);
+    text(`you protect the satellite for ${floor(time)} seconds`, width/2, height/2);
     textSize(16);
     text('press R to restart', width/2, height/2 + 64 + 32);
   } else {
