@@ -18,6 +18,7 @@ class Player {
   update() {
     const ACCELL = 40;
     const TORQUE = 1.5;
+    const ROT_LIMIT = 2.0
 
     let fx = sin(this.a);
     let fy = -cos(this.a);
@@ -34,7 +35,10 @@ class Player {
     this.y += this.vy * dt;
     this.a += this.va * dt;
 
-    this.va = this.va * 0.97;
+    // this.va = this.va * 0.97;
+    if (abs(this.va) > ROT_LIMIT) {
+      this.va = this.va>0? ROT_LIMIT : -ROT_LIMIT;
+    }
   }
 
   draw() {
