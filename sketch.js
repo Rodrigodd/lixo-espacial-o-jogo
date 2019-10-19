@@ -2,7 +2,8 @@ let dt = 1 / 30.0;
 let keys = {
   accel: 0,
   rot: 0,
-  fire: false
+  fire: false,
+  restart: true,
 };
 
 class Satelite {
@@ -15,13 +16,14 @@ class Satelite {
   hit(bullet) {
     if (dist(this.x, this.y, bullet.x, bullet.y) < 32) {
       this.life -= 1;
+      if (this.life < 0) this.life = 0;
       return true;
     }
     return false;
   }
 
-  hit_l(bullet) {
-    if (dist(this.x, this.y, bullet.x, bullet.y) < 32 + LIXO_RADIUS) {
+  hit_l(lixo) {
+    if (dist(this.x, this.y, lixo.x, lixo.y) < 32 + LIXO_RADIUS) {
       this.life -= 1;
       return true;
     }
@@ -193,19 +195,14 @@ let satelite;
 let lixos = [];
 let bullets = [];
 
+let lixo_delay = 0.0;
 let time = 0.0;
 
 function setup() {
   createCanvas(800, 600);
   background(10);
 
-  player = new Player(width / 2, height / 2);
-  satelite = new Satelite();
-  // createLoop({
-  //   duration:10,
-  //   framesPerSecond: 30,
-  //   gif:true
-  // })
+  init_new_game();
 }
 
 function keyPressed() {
@@ -225,6 +222,9 @@ function keyPressed() {
 
     case 80: //P
       saveCanvas();
+      break;
+    case 82: //R
+      keys.restart = true;
       break;
   }
 }
@@ -250,17 +250,34 @@ function keyReleased() {
   }
 }
 
+function init_new_game() {
+
+  let teta = random(0, TWO_PI);
+  let radius = min(height, width)/4.0;
+  player = new Player(width / 2 + sin(teta)*radius, height / 2 + cos(teta)*radius);
+  satelite = new Satelite();
+
+  bullets = [];
+  lixos = [];
+}
+
 function draw() {
   background(10);
 
   const SPAWN_INT = 3.0;
   const LIXO_VEL = 20;
-  if (time > SPAWN_INT*random(0.95,1.05)){
-    time = 0.0;
+  if (lixo_delay > SPAWN_INT*random(0.95,1.05)){
+    lixo_delay = 0.0;
     let dir = random(-0.3,0.3);
-    lixos.push(new Lixo(random(width),-100, LIXO_VEL*sin(dir), LIXO_VEL*cos(dir)));
+    let bottom = random()<0.5;
+    lixos.push(new Lixo(
+      random(width),
+      bottom? height+200 : -200,
+      LIXO_VEL*sin(dir),
+      (bottom?-1:1)*LIXO_VEL*cos(dir))
+    );
   }
-  time += dt;
+  lixo_delay += dt;
   
   player.update();
   for (let i = lixos.length - 1; i >= 0; i--) {
@@ -299,6 +316,7 @@ function draw() {
     }
   }
 
+  //>> DRAW
 
   for (let i = bullets.length - 1; i >= 0; i--) {
     bullets[i].draw();
@@ -308,5 +326,31 @@ function draw() {
   player.draw();
   for (let i = 0; i < lixos.length; i++) {
     lixos[i].draw();
+  }
+
+  if (satelite.life <= 0) {
+    fill(255,0,0,40);
+    rect(0, 0, width, height);
+    textAlign(CENTER,CENTER);
+    textSize(64);
+    fill(255,0,0);
+    stroke(0);
+    text("YOU FAIL!!!!", width/2, height/2);
+    textSize(32);
+    text(`you protect the satellite for ${floor(time)} seconds`, width/2, height/2 + 64);
+    textSize(16);
+    text('press R to restart', width/2, height/2 + 64 + 32);
+  } else {
+    time += dt;
+    textSize(32);
+    textAlign(LEFT,TOP); 
+    fill(255,255,0);
+    stroke(0);
+    text(`SCORE: ${floor(time)}`, 10, 10);
+  }
+
+  if (keys.restart) {
+    keys.restart = false;
+    init_new_game();
   }
 }
