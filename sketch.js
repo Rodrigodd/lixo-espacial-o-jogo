@@ -5,6 +5,40 @@ let keys = {
   fire: false
 };
 
+class Satelite {
+  constructor() {
+    this.x = width/2;
+    this.y = height/2;
+    this.life = 5;
+  }
+
+  hit(bullet) {
+    if (dist(this.x, this.y, bullet.x, bullet.y) < 32) {
+      this.life -= 1;
+      return true;
+    }
+    return false;
+  }
+
+  hit_l(bullet) {
+    if (dist(this.x, this.y, bullet.x, bullet.y) < 32 + LIXO_RADIUS) {
+      this.life -= 1;
+      return true;
+    }
+    return false;
+  }
+
+  draw() {
+    fill(150);
+    noStroke();
+    ellipse(this.x, this.y, 64);
+    fill(255,0,0);
+    rect(this.x - 32, this.y - 32 - 4, 64, 8);
+    fill(0,255,0);
+    rect(this.x - 32, this.y - 32 - 4, 64*this.life/5.0, 8);
+  }
+}
+
 class Bullet {
   constructor(x,y, vx, vy) {
     this.x = x;
@@ -155,6 +189,7 @@ class Player {
 }
 
 let player;
+let satelite;
 let lixos = [];
 let bullets = [];
 
@@ -165,6 +200,7 @@ function setup() {
   background(10);
 
   player = new Player(width / 2, height / 2);
+  satelite = new Satelite();
   // createLoop({
   //   duration:10,
   //   framesPerSecond: 30,
@@ -231,11 +267,21 @@ function draw() {
     lixos[i].update();
     if (lixos[i].is_out_of_bounds()) {
       lixos.splice(i,1);
+      continue;
+    }
+
+    if (satelite.hit_l(lixos[i])) {
+      lixos.splice(i,1);
     }
   }
   for (let i = bullets.length - 1; i >= 0; i--) {
     bullets[i].update();
     if (bullets[i].is_out_of_bounds()) {
+      bullets.splice(i,1);
+      continue;
+    }
+
+    if (satelite.hit(bullets[i])) {
       bullets.splice(i,1);
       continue;
     }
@@ -258,6 +304,7 @@ function draw() {
     bullets[i].draw();
   }
   strokeWeight(1);
+  satelite.draw();
   player.draw();
   for (let i = 0; i < lixos.length; i++) {
     lixos[i].draw();
