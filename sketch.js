@@ -154,7 +154,7 @@ class Player {
   }
 
   update() {
-    const ACCELL = 40;
+    const ACCELL = 20;
     const TORQUE = 1.5;
     const ROT_LIMIT = 2.0
 
@@ -164,12 +164,7 @@ class Player {
     let sx = cos(this.a);
     let sy = sin(this.a);
 
-    if (this.life >= 0) {
-      if (keys.mouse_control) {
-        let mousev = mouseVel();
-        keys.accel = min(mousev.y / 12, 1.0);
-        keys.rot = min(mousev.x / 12, 1.0);
-      }
+    if (this.life > 0) {
 
       if (keys.accel > 0) {
         this.vx += fx * ACCELL * dt;
@@ -248,7 +243,7 @@ class Player {
     //   this.y - fy - sy
     // );
 
-    let sx = !keys.accel? 0 : 1 + (floor(time*5)%2);
+    let sx = (!keys.accel || this.life == 0)? 0 : 1 + (floor(time*5)%2);
 
     push();
     translate(floor(this.x), floor(this.y));
@@ -280,6 +275,18 @@ function preload() {
 
 function setup() {
   createCanvas(800, 600);
+
+  document.exitPointerLock = document.exitPointerLock 
+    || document.mozExitPointerLock
+    || element.webkitRequestPointerLock;
+
+  canvas.requestPointerLock = canvas.requestPointerLock 
+    || canvas.mozRequestPointerLock
+    || element.webkitRequestPointerLock;
+  
+  document.addEventListener("mousemove", moveCallback, false);
+
+
   background(10);
 
   for(let i = 0; i< 40; i++) {
@@ -289,12 +296,28 @@ function setup() {
   init_new_game();
 }
 
-function mouseVel() {
-  return {
-    x: mouseX - pmouseX,
-    y: mouseY - pmouseY,
+function moveCallback(e) {
+  if (keys.mouse_control) {
+    var movementX = e.movementX
+      || e.mozMovementX
+      || e.webkitMovementX
+      || 0;
+    var movementY = e.movementY
+      || e.mozMovementY
+      || e.webkitMovementY
+      || 0;
+
+    print(movementX);
+    
+    keys.accel = constrain(-movementY/12, 0, 1);
+    keys.rot = constrain(movementX/12, -1, 1);
   }
+
 }
+
+var havePointerLock = 'pointerLockElement' in document
+  || 'mozPointerLockElement' in document
+  || 'webkitPointerLockElement' in document;
 
 function keyPressed() {
   switch (keyCode) {
@@ -318,13 +341,16 @@ function keyPressed() {
       keys.restart = true;
       break;
     case 77: //M
-      keys.mouse_control = !keys.mouse_control;
-      if(keys.mouse_control) {
-        requestPointerLock();
-      } else {
-        exitPointerLock();
+      if (havePointerLock) {
+        keys.mouse_control = !keys.mouse_control;
+
+        if(keys.mouse_control) {
+          canvas.requestPointerLock()
+        } else {
+          document.exitPointerLock();
+        }
       }
-      mouse
+
       break;
   }
 }
@@ -444,7 +470,7 @@ function draw() {
   }
 
   if (satelite.life <= 0 || player.life <= 0) {
-    fill(255,0,0,40);
+    fill(0, 0, 0, 40);
     rect(0, 0, width, height);
     textAlign(CENTER,CENTER);
     textSize(64);
