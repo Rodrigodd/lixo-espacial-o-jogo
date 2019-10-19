@@ -28,6 +28,10 @@ class Bullet {
 
     line(this.x, this.y, this.x - fx, this.y - fy);
   }
+
+  is_out_of_bounds() {
+    return this.x < -100 || this.x > width+100 || this.y < -100 || this.y > height+100;
+  }
 }
 
 const LIXO_RADIUS = 15;
@@ -38,6 +42,7 @@ class Lixo {
     this.y = y;
     this.vx = vx;
     this.vy = vy;
+    this.life = 3;
   }
 
   update() {
@@ -49,6 +54,17 @@ class Lixo {
     fill(100,50,0);
     stroke(255);
     ellipse(this.x, this.y, LIXO_RADIUS*2);
+  }
+
+  hit(bullet) {
+    if (dist(bullet.x, bullet.y, this.x, this.y) < LIXO_RADIUS + 10) {
+      this.life-=1;
+      const MASS_RATIO = 1/30;
+      this.vx += bullet.vx*MASS_RATIO;
+      this.vy += bullet.vy*MASS_RATIO;
+      return true;
+    }
+    return false;
   }
 
   is_out_of_bounds() {
@@ -219,6 +235,22 @@ function draw() {
   }
   for (let i = bullets.length - 1; i >= 0; i--) {
     bullets[i].update();
+    if (bullets[i].is_out_of_bounds()) {
+      bullets.splice(i,1);
+      continue;
+    }
+
+    for (let j = lixos.length-1; j >= 0; j--) {
+      let hit = false;
+      if (lixos[j].hit(bullets[i])) {
+        bullets.splice(i,1);
+        hit = true;
+      }
+      if (lixos[j].life <= 0){
+        lixos.splice(j,1);
+      }
+      if (hit) break;
+    }
   }
 
 
