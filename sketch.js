@@ -43,7 +43,7 @@ class Satelite {
     
     image(
       satelite_image,
-      this.x - 32, this.y - 32,
+      floor(this.x - 32), floor(this.y - 32),
       64, 64,
       this.life>0?64*(floor(time*5)%4):0, 64*floor((1 - this.life/15)*3),
       64, 64
@@ -54,6 +54,12 @@ class Satelite {
 
     fill(0,255,0);
     rect(this.x - 24, this.y - 32 - 4, 48*this.life/15.0, 4);
+    
+    fill(255);
+    noStroke();
+    textAlign(CENTER, TOP);
+    textSize(16);
+    text(satelite_name, this.x, this.y + 32);
   }
 }
 
@@ -264,8 +270,9 @@ let stars = [];
 let lixo_delay = 0.0;
 let time = 0.0;
 let score = 0;
+let final_score = -1
 
-let texts;
+let font_text;
 
 function preload() {
   satelite_image = loadImage('assets/satelite.png');
@@ -277,12 +284,18 @@ function preload() {
   terra_image = loadImage('assets/terra.png');
   menu_image = loadImage('assets/menu.png');
 
-  texts = loadJSON('message.json');
+  gps_ops = loadStrings('assets/gps-ops.txt');
+  internet_ops = loadStrings('assets/internet.txt');
+  weather_ops = loadStrings('assets/weather.txt');  
+  science_ops = loadStrings('assets/science.txt');  
+
+  font_text = loadFont('assets/PIXELADE.TTF');
 }
 
 function setup() {
   createCanvas(800, 600);
-
+  loadGPSNames();
+  textFont(font_text);
   document.exitPointerLock = document.exitPointerLock 
     || document.mozExitPointerLock
     || element.webkitRequestPointerLock;
@@ -384,6 +397,7 @@ function keyReleased() {
 }
 
 let satelite_text;
+let satelite_name = "";
 
 function init_new_game() {
 
@@ -397,19 +411,42 @@ function init_new_game() {
 
   time = 0.0;
   score = 0;
+  final_score = -1;
 
-  let chosse;
+  let choice;
   switch(floor(random(4))) {
-    case 0: chosse = 'map'; break;
-    case 1: chosse = 'internet'; break;
-    case 2: chosse = 'meteorological'; break;
-    case 3: chosse = 'scientific'; break;
+    case 0: choice = 'map'; break;
+    case 1: choice = 'internet'; break;
+    case 2: choice = 'meteorological'; break;
+    case 3: choice = 'scientific'; break;
   }
 
-  if (texts[chosse] instanceof Array) {
-    satelite_text = random(texts[chosse]);
+  switch(choice) {
+    case 'map':
+      satelite_name = random(gps_satelites_names);
+      break;
+    case 'internet':
+      satelite_name = random(internet_satelites_names);
+      break;
+    case 'meteorological':
+      satelite_name = random(weather_satelites_names);
+      break;
+    case 'scientific':
+      satelite_name = random(science_satelites_names);
+      break;
+    default:
+      satelite_name = "asdasdasd";
+  }
+  if (choice == 'map') {
+    
   } else {
-    satelite_text = texts[chosse];
+    
+  }
+
+  if (texts[choice] instanceof Array) {
+    satelite_text = random(texts[choice]);
+  } else {
+    satelite_text = texts[choice];
   }
 
 }
@@ -497,7 +534,7 @@ function on_history() {
   const DURATION = 40;
 
   background(0);
-  textSize(24);
+  textSize(32);
   fill(255,255,0);
   stroke(0);
   textAlign(CENTER,CENTER);
@@ -596,25 +633,28 @@ function on_game() {
   }
 
   if (satelite.life <= 0 || player.life <= 0) {
+    if (final_score < 0) {
+      final_score = score;
+    }
     fill(0, 0, 0, 100);
     rect(0, 0, width, height);
     
-    textSize(64);
+    textSize(72);
     fill(255,0,0);
     stroke(0);
     textAlign(CENTER,TOP); 
-    text(`${score}`, width/2, 10);
+    text(`${final_score}`, width/2, 10);
     textAlign(CENTER,CENTER);
     strokeWeight(3);
-    text("YOU FAILED!!!!", width/2, height/3);
-    textSize(32);
+    text("YOU FAILED!!!!", width/2, height/4);
+    textSize(48);
     // text(`you protect the satellite for ${floor(time)} seconds`, width/2, height/2);
     text(satelite_text, width/2, height/2);
     textSize(16);
     text('press R to restart', width/2, height - 48);
   } else {
     time += dt;
-    textSize(32);
+    textSize(48);
     textAlign(CENTER,TOP); 
     fill(255,255,0);
     stroke(0);
