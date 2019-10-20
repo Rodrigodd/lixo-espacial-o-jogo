@@ -1,4 +1,4 @@
-# lixo-espacial-o-jogo
+# Protector
 A game create in 48h for the nasa space apps challenge
 ![Logo](logo.gif)
 
