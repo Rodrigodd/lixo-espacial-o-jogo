@@ -11,6 +11,7 @@ let satelite_image;
 let nave_image;
 let lixo_images = [];
 let terra_image;
+let menu_image;
 
 class Satelite {
   constructor() {
@@ -197,6 +198,21 @@ class Player {
     if (abs(this.va) > ROT_LIMIT) {
       this.va = this.va>0? ROT_LIMIT : -ROT_LIMIT;
     }
+
+    const CONSERVATION = 0.5;
+
+    if (this.x < 32 && this.vx < 0) {
+      this.vx = -this.vx*CONSERVATION;
+    }
+    if (this.x > width-32 && this.vx > 0) {
+      this.vx = -this.vx*CONSERVATION;
+    }
+    if (this.y < 32 && this.vy < 0) {
+      this.vy = -this.vy*CONSERVATION;
+    }
+    if (this.y > height-32 && this.vy > 0) {
+      this.vy = -this.vy*CONSERVATION;
+    }
   }
   
   hit(lixo) {
@@ -227,22 +243,6 @@ class Player {
   }
 
   draw() {
-    // fill(255);
-    // stroke(0);
-    // let fx = sin(this.a) * 20;
-    // let fy = -cos(this.a) * 20;
-
-    // let sx = cos(this.a) * 15;
-    // let sy = sin(this.a) * 15;
-
-    // triangle(
-    //   this.x + fx,
-    //   this.y + fy, 
-    //   this.x - fx + sx,
-    //   this.y - fy + sy,
-    //   this.x - fx - sx,
-    //   this.y - fy - sy
-    // );
 
     let sx = (!keys.accel || this.life == 0)? 0 : 1 + (floor(time*5)%2);
 
@@ -265,6 +265,8 @@ let lixo_delay = 0.0;
 let time = 0.0;
 let score = 0;
 
+let texts;
+
 function preload() {
   satelite_image = loadImage('assets/satelite.png');
   nave_image = loadImage('assets/nave.png');
@@ -273,6 +275,9 @@ function preload() {
   lixo_images[2] = loadImage('assets/lixo2.png');
   lixo_images[3] = loadImage('assets/lixo3.png');
   terra_image = loadImage('assets/terra.png');
+  menu_image = loadImage('assets/menu.png');
+
+  texts = loadJSON('message.json');
 }
 
 function setup() {
@@ -378,6 +383,8 @@ function keyReleased() {
   }
 }
 
+let satelite_text;
+
 function init_new_game() {
 
   let teta = random(0, TWO_PI);
@@ -390,9 +397,126 @@ function init_new_game() {
 
   time = 0.0;
   score = 0;
+
+  let chosse;
+  switch(floor(random(4))) {
+    case 0: chosse = 'map'; break;
+    case 1: chosse = 'internet'; break;
+    case 2: chosse = 'meteorological'; break;
+    case 3: chosse = 'scientific'; break;
+  }
+
+  if (texts[chosse] instanceof Array) {
+    satelite_text = random(texts[chosse]);
+  } else {
+    satelite_text = texts[chosse];
+  }
+
 }
 
+let state = 0;
+
 function draw() {
+  let r;
+  switch (state) {
+    case 0:
+      r = on_menu();
+      if (r!=-1) {
+        state = r;
+        time = 0;
+      };
+      break;
+    case 1:
+      r = on_history();
+      if (r!=-1) {
+        state = r;
+      };
+      break;
+    case 2:
+      r = on_game();
+      if (r!=-1) {
+        state = r;
+      };
+      break;
+  }
+}
+
+function on_menu() {
+
+  time += dt;
+
+  const SPAWN_INT = 1.0;
+  const LIXO_VEL = 30;
+  if (lixo_delay > SPAWN_INT*random(0.95,1.05)){
+    lixo_delay = 0.0;
+    let dir = random(-0.3,0.3);
+    let bottom = random()<0.5;
+    lixos.push(new Lixo(
+      random(width),
+      bottom? height+200 : -200,
+      LIXO_VEL*sin(dir),
+      (bottom?-1:1)*LIXO_VEL*cos(dir))
+    );
+  }
+  lixo_delay += dt;
+
+  for (let i = lixos.length - 1; i >= 0; i--) {
+    lixos[i].update();
+    if (lixos[i].is_out_of_bounds()) {
+      lixos.splice(i,1);
+      continue;
+    }
+  }
+
+  //>> DRAW
+
+  background(10);
+
+  stroke(255);
+  strokeWeight(3);
+  for(let i = 0; i < stars.length; i++){
+    point(stars[i].x, stars[i].y);
+  }
+
+  strokeWeight(1);
+  for (let i = 0; i < lixos.length; i++) {
+    lixos[i].draw();
+  }
+
+  image(menu_image, 0, 0, 800, 600, 0, 600*(floor(time*2)%2), 800, 600);  
+
+  if(keyIsPressed){
+     return 1;
+  } else {
+    return -1;
+  }
+}
+
+function on_history() {
+
+  const DURATION = 40;
+
+  background(0);
+  textSize(24);
+  fill(255,255,0);
+  stroke(0);
+  textAlign(CENTER,CENTER);
+  text(history, width/2, (height + 300)*(1 - time/DURATION) - 150);
+
+  if (keys.fire) {
+    time+=dt*15;
+  } else {
+    time+=dt;
+  }
+
+  if (time > DURATION) {
+    return 2;
+  } else {
+    return -1;
+  }
+}
+
+function on_game() {
 
   const SPAWN_INT = 3.0;
   const LIXO_VEL = 20;
@@ -453,12 +577,9 @@ function draw() {
 
   background(10);
 
-  // noStroke();
-  // fill(255);
   stroke(255);
-
+  strokeWeight(3);
   for(let i = 0; i < stars.length; i++){
-    // rect()
     point(stars[i].x, stars[i].y);
   }
 
@@ -475,18 +596,22 @@ function draw() {
   }
 
   if (satelite.life <= 0 || player.life <= 0) {
-    fill(0, 0, 0, 40);
+    fill(0, 0, 0, 100);
     rect(0, 0, width, height);
-    textAlign(CENTER,CENTER);
+    
     textSize(64);
     fill(255,0,0);
     stroke(0);
+    textAlign(CENTER,TOP); 
+    text(`${score}`, width/2, 10);
+    textAlign(CENTER,CENTER);
     strokeWeight(3);
-    text("YOU FAIL!!!!", width/2, height/3);
+    text("YOU FAILED!!!!", width/2, height/3);
     textSize(32);
-    text(`you protect the satellite for ${floor(time)} seconds`, width/2, height/2);
+    // text(`you protect the satellite for ${floor(time)} seconds`, width/2, height/2);
+    text(satelite_text, width/2, height/2);
     textSize(16);
-    text('press R to restart', width/2, height/2 + 64 + 32);
+    text('press R to restart', width/2, height - 48);
   } else {
     time += dt;
     textSize(32);
@@ -503,4 +628,6 @@ function draw() {
     keys.restart = false;
     init_new_game();
   }
+
+  return -1;
 }
