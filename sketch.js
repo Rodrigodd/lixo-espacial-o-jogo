@@ -202,6 +202,7 @@ class Player {
   hit(lixo) {
     if(dist(lixo.x, lixo.y, this.x, this.y) < 32 + lixo.radius) {
       this.life -= 1;
+      lixo.life -= 1;
       if (this.life <= 0) this.life = 0;
 
       let dx = this.x - lixo.x;
@@ -262,6 +263,7 @@ let stars = [];
 
 let lixo_delay = 0.0;
 let time = 0.0;
+let score = 0;
 
 function preload() {
   satelite_image = loadImage('assets/satelite.png');
@@ -387,6 +389,7 @@ function init_new_game() {
   lixos = [];
 
   time = 0.0;
+  score = 0;
 }
 
 function draw() {
@@ -435,9 +438,11 @@ function draw() {
       let hit = false;
       if (lixos[j].hit(bullets[i])) {
         bullets.splice(i,1);
+        score += 2;
         hit = true;
       }
       if (lixos[j].life <= 0){
+        score += 10;
         lixos.splice(j,1);
       }
       if (hit) break;
@@ -485,10 +490,10 @@ function draw() {
   } else {
     time += dt;
     textSize(32);
-    textAlign(LEFT,TOP); 
+    textAlign(CENTER,TOP); 
     fill(255,255,0);
     stroke(0);
-    text(`SCORE: ${floor(time)}`, 10, 10);
+    text(`${score}`, width/2, 10);
     textAlign(RIGHT,TOP); 
     text(`LIFES: ${floor(player.life-1)}x`, width - 10, 10);
   }
