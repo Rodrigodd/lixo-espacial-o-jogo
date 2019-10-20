@@ -1,22 +1,25 @@
-let texts = {
-  map: [
+let texts = [
+  [
     "523 people have died from a plane crash\nbecause the airplane lost contact\nwith the control tower.",
     "Sr. Jorge doesn't find the way to his new job.\nNow he don't have a job.",
     "Ricardo the Trucker got lost on his way\nbecause he didn't have GPS anymore.\nNow Sandro freight are 30% more expensive."
   ],
-  internet: [
+  [
     "Teenagers can not play\nLeague of Legends today.",
-    "Nathan missed his university\napplication deadline because\nhe lost internet connection.\nNathan lost a year."
+    "Nathan missed his university\napplication deadline because\nhe lost internet connection.\nNathan lost a year.",
+    "You lost internet connection.\nCoincidentally, You discover that\nthere are people called Mom and\nDad in your house."
   ],
-  meteorological: [
+  [
     "Thousands of people don't know\nif they'll need to get an umbrella\nto the job tomorrow or not!",
-    "Jorge Jr. is stuck in school,\nbecause it is raining,\nand he don't have a umbrella."
+    "Jorge Jr. is stuck in school,\nbecause it is raining,\nand he don't have a umbrella.",
+    "Sergio is stucked in the traffic jam\nbecause he didn't know that\nwas starting a snow storm."
   ],
-  scientific: [
+  [
     "Scientists around the world are supposed\nto use satellite's data to work on it.\nBut….. It seems that they won't do this today!",
-    "Now, the global warming cannot be prove."
+    "Now, the global warming cannot be proved.",
+    "The earth is flat."
   ]
-};
+];
 
 let history =
   "    In 21xx space junk became an irreversible problem.\n" +

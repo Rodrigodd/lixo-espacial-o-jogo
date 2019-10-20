@@ -60,6 +60,18 @@ class Satelite {
     textAlign(CENTER, TOP);
     textSize(16);
     text(satelite_name, this.x, this.y + 32);
+    textSize(12);
+
+    let type_satelite;
+
+    switch (choice) {
+      case 0: type_satelite = 'Navigation'; break;
+      case 1: type_satelite = 'Communication'; break;
+      case 2: type_satelite = 'Weather'; break;
+      case 3: type_satelite = 'Science'; break;
+    }
+
+    text(type_satelite, this.x, this.y + 48);
   }
 }
 
@@ -399,6 +411,8 @@ function keyReleased() {
 let satelite_text;
 let satelite_name = "";
 
+let choice;
+
 function init_new_game() {
 
   let teta = random(0, TWO_PI);
@@ -413,41 +427,25 @@ function init_new_game() {
   score = 0;
   final_score = -1;
 
-  let choice;
-  switch(floor(random(4))) {
-    case 0: choice = 'map'; break;
-    case 1: choice = 'internet'; break;
-    case 2: choice = 'meteorological'; break;
-    case 3: choice = 'scientific'; break;
-  }
+
+  choice = floor(random(4));
 
   switch(choice) {
-    case 'map':
+    case 0:
       satelite_name = random(gps_satelites_names);
       break;
-    case 'internet':
+    case 1:
       satelite_name = random(internet_satelites_names);
       break;
-    case 'meteorological':
+    case 2:
       satelite_name = random(weather_satelites_names);
       break;
-    case 'scientific':
+    case 3:
       satelite_name = random(science_satelites_names);
       break;
-    default:
-      satelite_name = "asdasdasd";
-  }
-  if (choice == 'map') {
-    
-  } else {
-    
   }
 
-  if (texts[choice] instanceof Array) {
-    satelite_text = random(texts[choice]);
-  } else {
-    satelite_text = texts[choice];
-  }
+  satelite_text = random(texts[choice]);
 
 }
 
@@ -521,6 +519,9 @@ function on_menu() {
   }
 
   image(menu_image, 0, 0, 800, 600, 0, 600*(floor(time*2)%2), 800, 600);  
+
+  text("move with ARROWS", width/4, height*0.75);
+  text("open fire with ESPACE", width*3/4, height*0.75);
 
   if(keyIsPressed){
      return 1;
