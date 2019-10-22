@@ -384,7 +384,12 @@ function keyPressed() {
       }
 
       break;
+    case 71: //G
+      startRecording();
+      break;
   }
+
+  return false;
 }
 
 function keyReleased() {
@@ -406,6 +411,7 @@ function keyReleased() {
       keys.fire = false;
       break;
   }
+  return false;
 }
 
 let satelite_text;
@@ -520,6 +526,10 @@ function on_menu() {
 
   image(menu_image, 0, 0, 800, 600, 0, 600*(floor(time*2)%2), 800, 600);  
 
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  noStroke();
+  fill(255, 255, 0);
   text("move with ARROWS", width/4, height*0.75);
   text("open fire with ESPACE", width*3/4, height*0.75);
 
